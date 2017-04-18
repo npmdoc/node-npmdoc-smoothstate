@@ -697,7 +697,7 @@ local.templateApidocHtml = '\
                     // update exampleList
                     options.exampleList.push(readExample(file));
                     console.error('apidocCreate - ' + options.exampleList.length +
-                        '. added libFile ' + tmp.name);
+                        '. added libFile ' + file);
                 } catch (errorCaught) {
                     console.error(errorCaught);
                 }
@@ -2126,7 +2126,7 @@ local.templateApidocHtml = '\
                 : value;
         };
 
-        local.dbRowListGetManyByOperator = function (dbRowList, fieldName, operator, bb) {
+        local.dbRowListGetManyByOperator = function (dbRowList, fieldName, operator, bb, not) {
         /*
          * this function will get the dbRow's in dbRowList with the given operator
          */
@@ -2233,7 +2233,7 @@ local.templateApidocHtml = '\
                 }
                 // optimization - for-loop
                 for (jj = fieldValue.length - 1; jj >= 0; jj -= 1) {
-                    if (test(fieldValue[jj], bb, typeof fieldValue[jj], typeof2)) {
+                    if (not ^ test(fieldValue[jj], bb, typeof fieldValue[jj], typeof2)) {
                         result.push(dbRowList[ii]);
                         break;
                     }
@@ -2242,19 +2242,28 @@ local.templateApidocHtml = '\
             return result;
         };
 
-        local.dbRowListGetManyByQuery = function (dbRowList, query, fieldName) {
+        local.dbRowListGetManyByQuery = function (dbRowList, query, fieldName, not) {
         /*
          * this function will get the dbRow's in dbRowList with the given query
          */
             var bb, dbRowDict, result;
+            not = !!not;
             result = dbRowList;
             if (!(query && typeof query === 'object')) {
-                result = local.dbRowListGetManyByOperator(result, fieldName, '$eq', query);
+                result = local.dbRowListGetManyByOperator(result, fieldName, '$eq', query, not);
                 return result;
             }
             Object.keys(query).some(function (key) {
                 bb = query[key];
-                if (key === '$or' && Array.isArray(bb)) {
+                switch (key) {
+                case '$not':
+                    key = fieldName;
+                    not = !not;
+                    break;
+                case '$or':
+                    if (!Array.isArray(bb)) {
+                        break;
+                    }
                     dbRowDict = {};
                     bb.forEach(function (query) {
                         // recurse
@@ -2268,11 +2277,11 @@ local.templateApidocHtml = '\
                     return !result.length;
                 }
                 if (key[0] === '$') {
-                    result = local.dbRowListGetManyByOperator(result, fieldName, key, bb);
+                    result = local.dbRowListGetManyByOperator(result, fieldName, key, bb, not);
                     return !result.length;
                 }
                 // recurse
-                result = local.dbRowListGetManyByQuery(result, bb, key);
+                result = local.dbRowListGetManyByQuery(result, bb, key, not);
                 return !result.length;
             });
             return result;
@@ -10072,7 +10081,10 @@ shBuildCi\n\
 
 
 local.assetsDict['/assets.readmeCustomOrg.npmdoc.template.md'] = '\
-# api documentation for \
+# npmdoc-{{env.npm_package_name}} \
+\n\
+\n\
+api documentation for \
 {{#if env.npm_package_homepage}} \
 [{{env.npm_package_name}} (v{{env.npm_package_version}})]({{env.npm_package_homepage}}) \
 {{#unless env.npm_package_homepage}} \
@@ -10121,7 +10133,10 @@ local.assetsDict['/assets.readmeCustomOrg.npmdoc.template.md'] = '\
 
 
 local.assetsDict['/assets.readmeCustomOrg.npmtest.template.md'] = '\
-# test coverage for \
+# npmtest-{{env.npm_package_name}} \
+\n\
+\n\
+test coverage for \
 {{#if env.npm_package_homepage}} \
 [{{env.npm_package_name}} (v{{env.npm_package_version}})]({{env.npm_package_homepage}}) \
 {{#unless env.npm_package_homepage}} \
@@ -12148,9 +12163,7 @@ return Utf8ArrayToStr(bff);
             });
             local.fs.writeFileSync('README.md', options.readme);
             // re-build package.json
-            options.packageJson.description = (/\w.*/).exec(options.readme)[0]
-                .replace((/ {2,}/g), ' ')
-                .trim();
+            options.packageJson.description = options.readme.split('\n')[2].trim();
             local.fs.writeFileSync(
                 'package.json',
                 local.jsonStringifyOrdered(options.packageJson, null, 4) + '\n'
