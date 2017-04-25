@@ -1,6 +1,7 @@
 # npmdoc-smoothstate
 
-api documentation for  [smoothstate (v0.7.2)](http://miguel-perez.github.io/smoothState.js/)  [![npm package](https://img.shields.io/npm/v/npmdoc-smoothstate.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-smoothstate) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-smoothstate.svg)](https://travis-ci.org/npmdoc/node-npmdoc-smoothstate)
+#### basic api documentation for  [smoothstate (v0.7.2)](http://miguel-perez.github.io/smoothState.js/)  [![npm package](https://img.shields.io/npm/v/npmdoc-smoothstate.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-smoothstate) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-smoothstate.svg)](https://travis-ci.org/npmdoc/node-npmdoc-smoothstate)
+
 #### Unobtrusive page transitions with jQuery.
 
 [![NPM](https://nodei.co/npm/smoothstate.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/smoothstate)
@@ -72,7 +73,8 @@ api documentation for  [smoothstate (v0.7.2)](http://miguel-perez.github.io/smoo
         "url": "git+ssh://git@github.com/miguel-perez/smoothState.js.git"
     },
     "scripts": {},
-    "version": "0.7.2"
+    "version": "0.7.2",
+    "bin": {}
 }
 ```
 
